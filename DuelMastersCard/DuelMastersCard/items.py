@@ -4,14 +4,30 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+from dataclasses import dataclass
+
+
+@dataclass
+class Card:
+    name: str = ""
+    type: str = ""
+    civilization: str = ""
+    tribe: str = ""
+    cost: str = ""
+    power: str = ""
+    effect: str = ""
+
+
+@dataclass
+class Expansion:
+    expansion: str = ""
+    rarity: str = ""
+    number: str = ""
+    foil: str = ""
+    flavor: str = ""
+    drawer: str = ""
 
 
 class DuelmasterscardItem(scrapy.Item):
-    name = scrapy.Field()
-    type = scrapy.Field()
-    civilization = scrapy.Field()
-    tribe = scrapy.Field()
-    cost = scrapy.Field()
-    power = scrapy.Field()
-    effect = scrapy.Field()
     collections = scrapy.Field()
+    cards = scrapy.Field()
