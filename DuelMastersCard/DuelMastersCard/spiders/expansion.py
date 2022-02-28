@@ -5,6 +5,8 @@ from scrapy.spiders import CrawlSpider, Rule
 
 from ..items import Card, DuelmasterscardItem, Expansion
 
+import re
+
 
 class ExpansionSpider(CrawlSpider):
     name = "expansion"
@@ -37,7 +39,6 @@ class ExpansionSpider(CrawlSpider):
 
     def parse_item(self, response):
         names = response.xpath("//h1/text()")[0].get().split("／")
-        print(names)
         cards = []
         detail_tables = response.xpath('//*[@id="pane0"]/div[1]/div/div[1]/div/table')
         for i, details in enumerate(detail_tables):
@@ -65,13 +66,18 @@ class ExpansionSpider(CrawlSpider):
         )
 
         collections = []
-        collection = Expansion(expansion="", rarity="", number="", flavor="")
         for i, detail in enumerate(expansion_details):
-            detail_bs = BeautifulSoup(detail.get(), "lxml").text.split()
+            detail_bs = BeautifulSoup(detail.get(), "lxml").text
             if i % 7 == 0:
-                pass
+                collection = Expansion()
             if i % 7 == 1:
-                collection.expansion = detail_bs
+                date = detail_bs[:5]
+                expansion = detail_bs[6:]
+                expansion_id = re.findall("[A-Z]*-\S*", expansion)[0]
+                expansion_name = expansion.lstrip(expansion_id + " ")
+                collection.date = date
+                collection.id = expansion_id
+                collection.name = expansion_name
             if i % 7 == 2:
                 collection.rarity = detail_bs
             if i % 7 == 3:

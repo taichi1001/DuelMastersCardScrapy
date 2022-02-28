@@ -20,7 +20,9 @@ class Card:
 
 @dataclass
 class Expansion:
-    expansion: str = ""
+    id: str = ""
+    name: str = ""
+    date: str = ""
     rarity: str = ""
     number: str = ""
     foil: str = ""
