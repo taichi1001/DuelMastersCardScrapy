@@ -3,14 +3,15 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 from scrapy.spiders import CrawlSpider, Rule
 
-from ..items import Card, DuelmasterscardItem, Recording
+from ..items import Card, DuelMastersCardItem, Recording
 
 
 class ExpansionSpider(CrawlSpider):
     name = "expansion"
     allowed_domains = ["dmvault.ath.cx"]
     start_urls = [
-        "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=&status=&sortby=%E3%81%AA%E3%81%97",
+        # "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=&status=&sortby=%E3%81%AA%E3%81%97",
+        "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=%E9%BB%92%E8%B1%86&status=&sortby=%E3%81%AA%E3%81%97",
     ]
 
     rules = (
@@ -38,7 +39,8 @@ class ExpansionSpider(CrawlSpider):
     )
 
     def parse_item(self, response):
-        names = response.xpath("//h1/text()")[0].get().split("／")
+        name = response.xpath("//h1/text()")[0].get()
+        names = name.split("／")
         cards = []
         detail_tables = response.xpath('//*[@id="pane0"]/div[1]/div/div[1]/div/table')
         for i, detail_table in enumerate(detail_tables):
@@ -76,7 +78,8 @@ class ExpansionSpider(CrawlSpider):
                 collection.add_value("drawer", detail_bs)
                 collections.append(collection.load_item())
 
-        item = ItemLoader(item=DuelmasterscardItem())
+        item = ItemLoader(item=DuelMastersCardItem())
+        item.add_value("name", name)
         item.add_value("cards", cards)
         item.add_value("collections", collections)
 

@@ -81,6 +81,7 @@ class Recording(scrapy.Item):
     drawer = scrapy.Field()
 
 
-class DuelmasterscardItem(scrapy.Item):
+class DuelMastersCardItem(scrapy.Item):
+    name = scrapy.Field()
     collections = scrapy.Field()
     cards = scrapy.Field()
