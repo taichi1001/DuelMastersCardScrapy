@@ -10,23 +10,15 @@ class ExpansionSpider(CrawlSpider):
     name = "expansion"
     allowed_domains = ["dmvault.ath.cx"]
     start_urls = [
-        # "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=&status=&sortby=%E3%81%AA%E3%81%97",
-        "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=%E9%BB%92%E8%B1%86&status=&sortby=%E3%81%AA%E3%81%97",
+        "https://dmvault.ath.cx/card/?cardtype=%E3%81%99%E3%81%B9%E3%81%A6&civilization=%E3%81%99%E3%81%B9%E3%81%A6&race=%E3%81%99%E3%81%B9%E3%81%A6&power=%E3%81%99%E3%81%B9%E3%81%A6&cost=%E3%81%99%E3%81%B9%E3%81%A6&pks__filter=&expansion=&cardname=&status=&sortby=%E3%81%AA%E3%81%97",
     ]
 
     rules = (
         # 一覧ページから個別ページへ遷移するルール
         Rule(
             LinkExtractor(
-                deny=(
-                    r".*/decks.html",
-                    r".*/evaluations.html",
-                    r".*/combos.html",
-                    r".*/faqs.html",
-                    r".*/links.html",
-                ),
                 restrict_xpaths=[
-                    '//*[@class="table-responsive"]',
+                    '//*[@class="table-responsive"]//tr/td[4]',
                 ],
             ),
             callback="parse_item",
