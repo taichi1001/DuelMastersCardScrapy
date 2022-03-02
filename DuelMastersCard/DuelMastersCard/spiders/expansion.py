@@ -1,11 +1,11 @@
-import scrapy
+import re
+
 from bs4 import BeautifulSoup
 from scrapy.linkextractors import LinkExtractor
+from scrapy.loader import ItemLoader
 from scrapy.spiders import CrawlSpider, Rule
 
-from ..items import Card, DuelmasterscardItem, Expansion
-
-import re
+from ..items import Card, DuelmasterscardItem, Recording
 
 
 class ExpansionSpider(CrawlSpider):
@@ -16,6 +16,7 @@ class ExpansionSpider(CrawlSpider):
     ]
 
     rules = (
+        # 一覧ページから個別ページへ遷移するルール
         Rule(
             LinkExtractor(
                 deny=(
@@ -32,6 +33,7 @@ class ExpansionSpider(CrawlSpider):
             callback="parse_item",
             follow=False,
         ),
+        # 一覧ページから次一覧ページへ遷移するルール
         Rule(
             LinkExtractor(allow=(r".*?offset=",)),
         ),
@@ -41,57 +43,43 @@ class ExpansionSpider(CrawlSpider):
         names = response.xpath("//h1/text()")[0].get().split("／")
         cards = []
         detail_tables = response.xpath('//*[@id="pane0"]/div[1]/div/div[1]/div/table')
-        for i, details in enumerate(detail_tables):
-            details_bs = BeautifulSoup(details.get(), "lxml")
-            type = details_bs.find_all("td")[0].text.split()
-            civilization = details_bs.find_all("td")[1].text.split()
-            tribe = details_bs.find_all("td")[2].text.split()
-            power = details_bs.find_all("td")[3].text.split()
-            cost = details_bs.find_all("td")[4].text.split()
-            effect = details_bs.find_all("td")[5].text.split()
-            cards.append(
-                Card(
-                    name=names[i].split(),
-                    type=type,
-                    civilization=civilization,
-                    tribe=tribe,
-                    power=power,
-                    cost=cost,
-                    effect=effect,
-                )
-            )
+        for i, detail_table in enumerate(detail_tables):
+            card = ItemLoader(item=Card())
+            detail_table = BeautifulSoup(detail_table.get(), "lxml").find_all("td")
+            card.add_value("name", names[i])
+            card.add_value("type", detail_table[0].text)
+            card.add_value("civilization", detail_table[1].text)
+            card.add_value("tribe", detail_table[2].text)
+            card.add_value("power", detail_table[3].text)
+            card.add_value("cost", detail_table[4].text)
+            card.add_value("effect", detail_table[5].text)
+            cards.append(card.load_item())
 
         expansion_details = response.xpath(
             '//*[@id="pane0"]/div[1]/div/div[1]/div/form/div/div/table//tr/td'
         )
-
         collections = []
-        for i, detail in enumerate(expansion_details):
-            detail_bs = BeautifulSoup(detail.get(), "lxml").text
+        collection = ItemLoader(item=Recording())
+        for i, detail_table in enumerate(expansion_details):
+            detail_bs = BeautifulSoup(detail_table.get(), "lxml").text
             if i % 7 == 0:
-                collection = Expansion()
+                collection = ItemLoader(item=Recording())
             if i % 7 == 1:
-                date = detail_bs[:5]
-                expansion = detail_bs[6:]
-                expansion_id = re.findall("[A-Z]*-\S*", expansion)[0]
-                expansion_name = expansion.lstrip(expansion_id + " ")
-                collection.date = date
-                collection.id = expansion_id
-                collection.name = expansion_name
+                collection.add_value("expansion", detail_bs)
             if i % 7 == 2:
-                collection.rarity = detail_bs
+                collection.add_value("rarity", detail_bs)
             if i % 7 == 3:
-                collection.number = detail_bs
+                collection.add_value("number", detail_bs)
             if i % 7 == 4:
-                collection.foil = detail_bs
+                collection.add_value("foil", detail_bs)
             if i % 7 == 5:
-                collection.flavor = detail_bs
+                collection.add_value("flavor", detail_bs)
             if i % 7 == 6:
-                collection.drawer = detail_bs
-                collections.append(collection)
+                collection.add_value("drawer", detail_bs)
+                collections.append(collection.load_item())
 
-        item = DuelmasterscardItem()
-        item["cards"] = cards
-        item["collections"] = collections
+        item = ItemLoader(item=DuelmasterscardItem())
+        item.add_value("cards", cards)
+        item.add_value("collections", collections)
 
-        yield item
+        yield item.load_item()
