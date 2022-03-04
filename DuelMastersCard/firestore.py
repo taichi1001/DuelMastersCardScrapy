@@ -10,9 +10,9 @@ with open("./output.json", encoding="utf-8") as f:
 
 os.environ[
     "GOOGLE_APPLICATION_CREDENTIALS"
-] = "./sealed-deck-generator-firebase-adminsdk-31hvy-5babb988bb.json"
+] = "./sealed-deck-generator-firebase-adminsdk-31hvy-e990a08b60.json"
 
-cred = credentials.Certificate("./sealed-deck-generator-firebase-adminsdk-31hvy-5babb988bb.json")
+cred = credentials.Certificate("./sealed-deck-generator-firebase-adminsdk-31hvy-e990a08b60.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
